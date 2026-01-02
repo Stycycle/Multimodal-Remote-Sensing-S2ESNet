@@ -90,11 +90,23 @@ D:\Anaconda3\envs\pytorch\python.exe `
 D:\Anaconda3\envs\pytorch\python.exe `
    main.py `
    --model  S2ESNet `
-   --dataset Houston2013 `
-   --folder "E:\Project\Multimodal-Remote-Sensing-Toolkit\" `
+   --dataset Trento `
+   --folder "E:\Project\Multimodal-Remote-Sensing-S2ESNet\" `
    --lr 0.001 `
    --batch_size 64 `
    --flip_augmentation `
    --cuda 0 `
    --epoch 150 `
-   --training_sample 0.02
+   --training_sample 0.02 
+
+D:\Anaconda3\envs\pytorch\python.exe `
+   main.py `
+   --model  S2ESNet_Swin `
+   --dataset Augsburg `
+   --folder "E:\Project\Multimodal-Remote-Sensing-S2ESNet\" `
+   --lr 0.001 `
+   --batch_size 64 `
+   --flip_augmentation `
+   --cuda 0 `
+   --epoch 150 `
+   --training_sample 0.02 

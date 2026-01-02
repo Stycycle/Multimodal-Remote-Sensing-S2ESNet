@@ -17,6 +17,7 @@ from model.EndNet import EndNet
 from model.DML_Hong import Early_fusion_CNN, Middle_fusion_CNN, Late_fusion_CNN, Cross_fusion_CNN
 from model.S2ENet import S2ENet
 from model.S2ESNet import S2ESNet
+from model.S2ESNet_Swin import S2ESNet_Swin
 from losses import Cross_fusion_CNN_Loss, EndNet_Loss
 
 
@@ -109,6 +110,15 @@ def get_model(name, **kwargs):
         center_pixel = True
         model = S2ESNet(n_bands, n_bands2, n_classes, kwargs["patch_size"])
         # model = SlotFusion(n_bands, n_bands2, n_classes, kwargs["patch_size"])
+        lr = kwargs.setdefault("lr", 0.001)
+        optimizer = optim.Adam(model.parameters(), lr=lr)
+        criterion = nn.CrossEntropyLoss(weight=kwargs["weights"])
+        kwargs.setdefault("epoch", 150)
+        kwargs.setdefault("batch_size", 64)
+    elif name == "S2ESNet_Swin":
+        kwargs.setdefault("patch_size", 7)
+        center_pixel = True
+        model = S2ESNet_Swin(n_bands, n_bands2, n_classes, kwargs["patch_size"])
         lr = kwargs.setdefault("lr", 0.001)
         optimizer = optim.Adam(model.parameters(), lr=lr)
         criterion = nn.CrossEntropyLoss(weight=kwargs["weights"])

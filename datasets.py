@@ -140,12 +140,12 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
 
     elif dataset_name == "Trento":
         # Load the image
-        img1 = open_file(folder + 'HSI.mat')['HSI'].astype(np.float32)
+        img1 = open_file(folder + 'HSI_Trento.mat')['HSI_Trento'].astype(np.float32)
         rgb_bands = (40, 20, 10)
 
-        img2 = open_file(folder + 'LiDAR.mat')['LiDAR'].astype(np.float32)
+        img2 = open_file(folder + 'Lidar_Trento.mat')['Lidar_Trento'].astype(np.float32)
         img2 = np.expand_dims(img2, axis=2)  # (600, 166) --> (600, 166, 1)
-        gt = open_file(folder + 'gt.mat')['gt']     # Here, the gt file is load for filtering NaN out and visualization.
+        gt = open_file(folder + 'GT_Trento.mat')['GT_Trento']     # Here, the gt file is load for filtering NaN out and visualization.
 
 
         # normalization method 1: map to [0, 1]
@@ -171,41 +171,54 @@ def get_dataset(dataset_name, target_folder="./", datasets=DATASETS_CONFIG):
 
         ignored_labels = [0]
 
-    elif dataset_name == "Augsburg":
-
-        # Load the image
+    elif dataset_name == 'Augsburg':
+        # 1. 加载 HSI 数据 (对应 data_HS_LR.mat)
+        # 注意：['...'] 里的键名需要根据你 mat 文件内部实际变量名修改，通常是 'data' 或 'HS'
         img1 = open_file(folder + 'data_HS_LR.mat')['data_HS_LR'].astype(np.float32)
-        rgb_bands = (40, 20, 10)    # To Do: fix
+        rgb_bands = (30, 20, 10) # 这是一个常用参考值，具体视波段而定
 
+        # 2. 加载 LiDAR/DSM 数据 (对应 data_DSM.mat)
         img2 = open_file(folder + 'data_DSM.mat')['data_DSM'].astype(np.float32)
-        img2 = np.expand_dims(img2, axis=2)  # (332, 485) --> (332, 485, 1)
-        gt = open_file(folder + 'gt.mat')['gt']     # Here, the gt file is load for filtering NaN out and visualization.
+        if len(img2.shape) == 2:
+            img2 = np.expand_dims(img2, axis=2) # (H, W) --> (H, W, 1)
 
+        # 3. 加载 SAR 数据 (可选，data_SAR_HR.mat)
+        # 如果你的模型只支持双模态，可以跳过；如果要三模态，可以取消注释
+        # img3 = open_file(folder + 'data_SAR_HR.mat')['data'].astype(np.float32)
 
-        # normalization method 1: map to [0, 1]
+        # 4. 加载标签 (Augsburg 特点：分训练和测试)
+        train_gt = open_file(folder + 'TrainImage.mat')['TrainImage']
+        test_gt = open_file(folder + 'TestImage.mat')['TestImage']
+    
+        # 合并为一个 gt 矩阵用于后续统一处理，或者根据你的代码逻辑分别赋值
+        # 这里演示合并逻辑：非 0 即为标签
+        gt = train_gt + test_gt 
+
+        # 5. 归一化 (使用你原来的逻辑)
         [m, n, l] = img1.shape
         for i in range(l):
             minimal = img1[:, :, i].min()
             maximal = img1[:, :, i].max()
-            img1[:, :, i] = (img1[:, :, i] - minimal) / (maximal - minimal)
+            if maximal > minimal:
+                img1[:, :, i] = (img1[:, :, i] - minimal) / (maximal - minimal)
 
         minimal = img2.min()
         maximal = img2.max()
-        img2 = (img2 - minimal) / (maximal - minimal)
+        if maximal > minimal:
+            img2 = (img2 - minimal) / (maximal - minimal)
 
+        # 6. 定义类别名称 (Augsburg 通常有 7 类)
         label_values = [
             "Unclassified",
             "Forest",
             "Residential Area",
             "Industrial Area",
-            "Low Plants",
+            "Low Vegetation",
             "Allotment",
             "Commercial Area",
             "Water"
         ]
-
         ignored_labels = [0]
-
     else:
         # Custom dataset
         (
