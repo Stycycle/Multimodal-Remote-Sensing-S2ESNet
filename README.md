@@ -101,7 +101,7 @@ D:\Anaconda3\envs\pytorch\python.exe `
 
 D:\Anaconda3\envs\pytorch\python.exe `
    main.py `
-   --model  S2ESNet_Swin `
+   --model  S2ESNet_Swin_Pro `
    --dataset Augsburg `
    --folder "E:\Project\Multimodal-Remote-Sensing-S2ESNet\" `
    --lr 0.001 `
